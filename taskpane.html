@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invoice Request — TSG National</title>
+<script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0eeec; color: #1a1a1a; }
+.hdr { background: #074a75; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 20; }
+.hdr-t { color: #fff; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.hdr-s { color: #f47d48; font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.card { background: #fff; margin: 12px; border-radius: 3px; box-shadow: 0 1px 4px rgba(0,0,0,.07); overflow: hidden; }
+.card-head { background: #074a75; padding: 12px 14px 10px; border-bottom: 2px solid #f47d48; }
+.card-head h1 { color: #fff; font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+.card-head p { color: #a8c8e0; font-size: 10px; line-height: 1.5; }
+.card-body { padding: 14px; }
+.sec { margin-bottom: 16px; }
+.sl { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #074a75; border-bottom: 1px solid #e0ddd8; padding-bottom: 4px; margin-bottom: 10px; }
+.f { margin-bottom: 8px; }
+.f label { display: block; font-size: 10px; font-weight: 700; color: #4a5568; margin-bottom: 3px; letter-spacing: .03em; }
+.req { color: #f47d48; }
+input[type=text], input[type=email], textarea, select { width: 100%; border: 1px solid #d0ccc8; border-radius: 2px; padding: 6px 8px; font-size: 12px; font-family: inherit; color: #1a1a1a; background: #fff; outline: none; transition: border-color .15s; appearance: none; }
+input:focus, textarea:focus, select:focus { border-color: #074a75; }
+textarea { resize: vertical; min-height: 56px; line-height: 1.45; }
+select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23888'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; padding-right: 22px; }
+.hint { font-size: 10px; color: #888; margin-top: 2px; }
+.tog-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.tog { width: 32px; height: 18px; background: #ccc; border-radius: 9px; cursor: pointer; border: none; outline: none; position: relative; transition: background .2s; flex-shrink: 0; }
+.tog.on { background: #074a75; }
+.tog::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.2); transition: left .2s, background .2s; }
+.tog.on::after { left: 16px; background: #f47d48; }
+.tog-lbl { font-size: 11px; color: #1a1a1a; }
+.cb-wrap { position: relative; }
+.cb-drop { position: absolute; top: 100%; left: 0; right: 0; z-index: 100; background: #fff; border: 1px solid #074a75; border-top: none; border-radius: 0 0 3px 3px; max-height: 180px; overflow-y: auto; box-shadow: 0 4px 10px rgba(0,0,0,.1); display: none; }
+.cb-drop.open { display: block; }
+.cb-item { padding: 6px 9px; cursor: pointer; border-bottom: 1px solid #f0ede9; }
+.cb-item:last-child { border-bottom: none; }
+.cb-item:hover { background: #f0f5fb; }
+.cb-n { font-size: 11px; font-weight: 600; color: #074a75; }
+.cb-f { font-size: 10px; color: #666; margin-top: 1px; }
+.cb-m { font-size: 10px; color: #f47d48; font-weight: 600; margin-top: 1px; }
+.cb-empty { padding: 10px; font-size: 11px; color: #888; text-align: center; }
+.tag { display: inline-flex; align-items: center; gap: 5px; background: #e8f0f8; border: 1px solid #c0d4e8; border-radius: 2px; padding: 2px 7px; font-size: 10px; color: #074a75; font-weight: 600; margin-bottom: 6px; max-width: 100%; word-break: break-word; }
+.tag-x { cursor: pointer; color: #f47d48; font-weight: 700; font-size: 13px; line-height: 1; background: none; border: none; flex-shrink: 0; }
+.rate-ok { background: #eef4fb; border: 1px solid #b8d0e8; border-radius: 2px; padding: 6px 8px; font-size: 10px; color: #074a75; margin-bottom: 6px; }
+.rate-warn { background: #fff8f5; border: 1px solid #f4c8b0; border-radius: 2px; padding: 6px 8px; font-size: 10px; color: #a04010; margin-bottom: 6px; }
+.file-zone { border: 1.5px dashed #c0bbb5; border-radius: 2px; padding: 12px; text-align: center; cursor: pointer; background: #faf9f7; transition: border-color .15s, background .15s; }
+.file-zone:hover, .file-zone.drag { border-color: #074a75; background: #f0f5fb; }
+.file-zone input { display: none; }
+.fz-icon { font-size: 18px; margin-bottom: 3px; }
+.fz-txt { font-size: 11px; color: #555; }
+.fz-txt strong { color: #074a75; }
+.fz-sub { font-size: 9px; color: #888; margin-top: 2px; }
+.file-list { margin-top: 7px; display: flex; flex-direction: column; gap: 4px; }
+.fp { display: flex; align-items: center; gap: 4px; background: #f5f4f2; border: 1px solid #e0ddd8; border-radius: 2px; padding: 4px 8px; font-size: 10px; }
+.fp-name { color: #1a1a1a; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.fp-size { color: #888; flex-shrink: 0; }
+.fp-x { background: none; border: none; cursor: pointer; color: #888; font-size: 13px; line-height: 1; flex-shrink: 0; padding: 0 0 0 4px; }
+.fp-x:hover { color: #f47d48; }
+.up-bar { height: 3px; background: #e0ddd8; border-radius: 2px; margin-top: 5px; overflow: hidden; display: none; }
+.up-fill { height: 100%; background: #f47d48; width: 0%; transition: width .3s; }
+.err { background: #fff0ee; border: 1px solid #f4b8a8; border-radius: 2px; padding: 7px 9px; font-size: 11px; color: #b03010; margin-bottom: 8px; display: none; }
+.srow { display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-top: 4px; }
+.spin { font-size: 10px; color: #888; display: none; }
+.sbtn { background: #f47d48; color: #fff; border: none; border-radius: 2px; padding: 8px 18px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; letter-spacing: .03em; transition: background .15s; }
+.sbtn:hover:not(:disabled) { background: #e06930; }
+.sbtn:disabled { background: #bbb; cursor: default; }
+.success { background: #074a75; padding: 36px 20px; text-align: center; display: none; }
+.suc-c { width: 42px; height: 42px; background: #f47d48; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 20px; color: #fff; font-weight: 700; }
+.suc-t { color: #fff; font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+.suc-s { color: #a8c8e0; font-size: 11px; line-height: 1.6; }
+.suc-s strong { color: #fff; }
+.suc-btn { margin-top: 14px; background: #f47d48; color: #fff; border: none; border-radius: 2px; padding: 7px 18px; font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.suc-btn:hover { background: #e06930; }
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <span class="hdr-t">TSG National</span>
+  <span class="hdr-s">Billing Department</span>
+</div>
+
+<div id="mainView">
+  <div class="card">
+    <div class="card-head">
+      <h1>Invoice Request</h1>
+      <p>Creates a new item in the Billing &ndash; Invoice &ndash; Request board and uploads attached files to Monday.com.</p>
+    </div>
+    <div class="card-body">
+
+      <div class="sec">
+        <div class="sl">Deal Information</div>
+        <div class="f"><label>Client: City, State <span class="req">*</span></label>
+          <input type="text" id="client" placeholder="e.g. Hanger: Austin, TX"></div>
+        <div class="f"><label>Your Email <span class="req">*</span></label>
+          <input type="email" id="brokerEmail" placeholder="broker@tsgnational.com"></div>
+      </div>
+
+      <div class="sec">
+        <div class="sl">Billing Details</div>
+        <div class="f"><label>Payer Company <span class="req">*</span></label>
+          <input type="text" id="billCo" placeholder="Landlord or paying party"></div>
+        <div class="f"><label>Contact Name <span class="req">*</span></label>
+          <input type="text" id="billName" placeholder="Full name"></div>
+        <div class="f"><label>Contact Email <span class="req">*</span></label>
+          <input type="email" id="billEmail" placeholder="invoice@payer.com"></div>
+        <div class="f"><label>Commission Rate <span class="req">*</span></label>
+          <input type="text" id="commRate" placeholder="e.g. 3% of lease obligation"></div>
+        <div class="f"><label>Payment Structure <span class="req">*</span></label>
+          <input type="text" id="payStr" placeholder="e.g. 50% upon execution; 50% upon commencement"></div>
+      </div>
+
+      <div class="sec">
+        <div class="sl">Co-Broker &amp; Commission Rate</div>
+        <div class="tog-row">
+          <button class="tog" id="cbTog" onclick="toggleCb()" role="switch" aria-checked="false"></button>
+          <span class="tog-lbl" id="cbLbl">No co-broker on this transaction</span>
+        </div>
+        <div id="cbSec" style="display:none">
+          <div class="f"><label>Filter by State</label>
+            <select id="stateFilter" onchange="onStateChange()">
+              <option value="">All States</option>
+            </select>
+          </div>
+          <div class="f"><label>Search Co-Broker <span class="req">*</span></label>
+            <div class="cb-wrap" id="cbWrap">
+              <input type="text" id="cbSearch" placeholder="Name or firm&hellip;" autocomplete="off"
+                oninput="onCbInput()" onfocus="openDrop()">
+              <div class="cb-drop" id="cbDrop"></div>
+            </div>
+          </div>
+          <div id="selTag" style="display:none"></div>
+          <div id="rateBox" style="display:none"></div>
+          <div id="cbRateRow" style="display:none">
+            <div class="f">
+              <label>Confirmed Commission Rate <span class="req">*</span></label>
+              <input type="text" id="cbRate" placeholder="e.g. 10% of TSG commission">
+              <span class="hint">Enter the agreed rate for this transaction.</span>
+            </div>
+          </div>
+          <p class="hint" style="margin-top:4px">Confirm the co-broker is aware of this transaction before submitting.</p>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sl">Attachments</div>
+        <div class="file-zone" id="dropZone"
+          onclick="document.getElementById('fileInput').click()"
+          ondragover="event.preventDefault();this.classList.add('drag')"
+          ondragleave="this.classList.remove('drag')"
+          ondrop="onDrop(event)">
+          <input type="file" id="fileInput" multiple
+            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.msg,.xls,.xlsx"
+            onchange="onFileSelect(event)">
+          <div class="fz-icon">&#128206;</div>
+          <div class="fz-txt"><strong>Click to browse</strong> or drag files here</div>
+          <div class="fz-sub">Lease &middot; Commission Agreement &middot; W-9 &nbsp;|&nbsp; PDF, DOC, JPG, MSG</div>
+        </div>
+        <div class="up-bar" id="upBar"><div class="up-fill" id="upFill"></div></div>
+        <div class="file-list" id="fileList"></div>
+      </div>
+
+      <div class="err" id="errBox"></div>
+      <div class="srow">
+        <span class="spin" id="spinMsg">Submitting&hellip;</span>
+        <button class="sbtn" id="submitBtn" onclick="handleSubmit()">Submit Request &rarr;</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="success" id="successBox">
+  <div class="suc-c">&#10003;</div>
+  <div class="suc-t">Request Submitted</div>
+  <div class="suc-s" id="sucMsg">Item created in Monday.com.<br>Anna Jasso will follow up.</div>
+  <button class="suc-btn" onclick="resetForm()">Submit Another</button>
+</div>
+
+<script>
+// ─── CONFIGURE BEFORE DEPLOYING ──────────────────────────────────────────────
+const MONDAY_API_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjY1MTkwOTQxOCwiYWFpIjoxMSwidWlkIjoyNTYyOTk2NCwiaWFkIjoiMjAyNi0wNC0yOVQxNzo0NToxMi4wMDBaIiwicGVyIjoibWU6d3JpdGUiLCJhY3RpZCI6MTAyOTg0MjEsInJnbiI6InVzZTEifQ.Kh-ebdze82JcqkBuugIouJyHXIRJAerTc6Ufhc_9ufc';
+const BILLING_BOARD_ID = '7045123149';
+const FILE_COLUMN_ID   = 'upload_file__1';
+// ─────────────────────────────────────────────────────────────────────────────
+
+const CO_BROKERS = [
+  {id:"2771503517", name:"Roy Hanlin",                firm:"Coldwell Banker Commercial McLain RE",             states:["AL"],                          rate:"20% | 10%", email:""},
+  {id:"10698420971",name:"Scott McLain",               firm:"Coldwell Banker Commercial McLain RE, LLC",        states:["AL"],                          rate:"10%",       email:""},
+  {id:"3798065663", name:"Mollie Wall",                firm:"Jackson Commercial Real Estate, LLC",              states:["AZ"],                          rate:"10%",       email:"mwall@jacksoncommercial.com"},
+  {id:"3820313171", name:"Todd Hamilton",              firm:"Citywide Commercial Real Estate",                  states:["AZ"],                          rate:"Varies",    email:"todd@citywidecre.com"},
+  {id:"11733576259",name:"Golden St. John",            firm:"Vantage Commercial",                               states:["AZ"],                          rate:"10%",       email:"golden@vantage-commercial.com"},
+  {id:"2771504025", name:"Brandon Sheard",             firm:"Kelley Commercial Partners",                       states:["AR"],                          rate:"15%",       email:"bsheard@kelleycp.com"},
+  {id:"3798065119", name:"Brian Klepacki",             firm:"Resolute Advisors",                                states:["CA"],                          rate:"10%",       email:"bk@resolutead.com"},
+  {id:"3798065127", name:"Tanner Laverty",             firm:"Laverty Chacon, Inc.",                             states:["CA"],                          rate:"10-15%",    email:"tanner@lavertychacon.com"},
+  {id:"3798065188", name:"John Sabourin",              firm:"Tenant Guardian",                                  states:["CA"],                          rate:"15%",       email:""},
+  {id:"3819883763", name:"Jeff Puffer",                firm:"Delphi Business Properties, Inc.",                 states:["CA"],                          rate:"Varies",    email:"jeff@go2delphi.com"},
+  {id:"5940618326", name:"Donald Katich",              firm:"Radius Group Commercial Real Estate",              states:["CA"],                          rate:"Varies",    email:""},
+  {id:"3798065336", name:"Craig DeLorenzo",            firm:"Hoff & Leigh",                                     states:["CO"],                          rate:"10%",       email:"cdelorenzo@hoffleigh.com"},
+  {id:"5928222150", name:"Brandon Langiewicz",         firm:"Hoff & Leigh",                                     states:["CO"],                          rate:"10%",       email:"blangiewicz@hoffleigh.com"},
+  {id:"3798065135", name:"Joseph M. Draghi",           firm:"Great Dane Properties, LLC",                       states:["CT","FL","MA","NH","NY","PA","VT"], rate:"10%", email:"jdraghi@greatdaneproperties.com"},
+  {id:"10672752333",name:"Sean Balile",                firm:"Clarity TR",                                       states:["DC"],                          rate:"15%",       email:"sean@claritytr.com"},
+  {id:"5928296718", name:"Jeff Shahan",                firm:"SB Real Estate, LLC",                              states:["DE"],                          rate:"10%",       email:"jeff@sbrealtyco.com"},
+  {id:"3798065512", name:"Michael Leiser",             firm:"Corporate Leasing Services",                       states:["FL"],                          rate:"20%",       email:"leiser911@gmail.com"},
+  {id:"2304990829", name:"Heather Hadley",             firm:"Van Wert Real Estate Services",                    states:["FL"],                          rate:"10%",       email:"heather@heatherhadley.me"},
+  {id:"7260436064", name:"Whitney Eubanks",            firm:"Structure Commercial Real Estate",                 states:["FL"],                          rate:"15%",       email:"whitney@structureiq.net"},
+  {id:"18182832382",name:"Stephen M. Coughlin",        firm:"Coughlin Commercial, LLC",                         states:["FL"],                          rate:"15%",       email:""},
+  {id:"18185284172",name:"Zach Ullian, SIOR",          firm:"The Ullian Realty Corporation",                    states:["FL"],                          rate:"20%",       email:"zach@ullianrealty.com"},
+  {id:"3819931074", name:"Chad Williams",              firm:"Net Lease Alliance",                               states:["FL"],                          rate:"Varies",    email:"cwilliams@netleasealliance.com"},
+  {id:"3820089315", name:"Matt Sultenfuss",            firm:"Avocat Group",                                     states:["FL"],                          rate:"Varies",    email:"ms@avocatgroup.com"},
+  {id:"3798064764", name:"Brayden Wynn",               firm:"Collett Management, LLC",                          states:["GA","NC","SC"],                 rate:"10%",       email:"BWynn@collettre.com"},
+  {id:"3798065416", name:"Pat Shalz, SIOR",            firm:"TOK Commercial",                                   states:["ID"],                          rate:"15%",       email:""},
+  {id:"6020400219", name:"Joe Cooley",                 firm:"Mountain West Commercial Real Estate",             states:["ID","UT","WY"],                 rate:"10%",       email:"jcooley@mtnwest.com"},
+  {id:"3798065083", name:"Peter K. Billmeyer",         firm:"Bespoke CRE",                                      states:["IL"],                          rate:"10%",       email:"peter@bespokecre.com"},
+  {id:"4044253418", name:"Nathan Steinwedel",          firm:"RE/MAX Traders Unlimited",                         states:["IL"],                          rate:"15%",       email:""},
+  {id:"3820268108", name:"Ryan Moen",                  firm:"Versa Real Estate Services",                       states:["IL"],                          rate:"Varies",    email:"rmoen@versares.com"},
+  {id:"3798065116", name:"Alexa Larson",               firm:"ALO Property Group",                               states:["IN"],                          rate:"10-15%",    email:"alexa@alopg.com"},
+  {id:"3798064617", name:"Keith Olson",                firm:"Locate Commercial Real Estate",                    states:["IA"],                          rate:"10%",       email:""},
+  {id:"3798065343", name:"Alix Holiday",               firm:"Hawkeye Commercial Real Estate, LLC",              states:["IA"],                          rate:"Varies",    email:""},
+  {id:"5906592919", name:"Kelli Jones",                firm:"Pro-Link Realty, Inc.",                            states:["IA"],                          rate:"Varies",    email:"kjones@c21prolink.com"},
+  {id:"3798065345", name:"Ken Schmanke",               firm:"K1 Realty",                                        states:["KS","KY"],                      rate:"10%",       email:"ken.schmanke@k1team.com"},
+  {id:"3798064654", name:"Paul Grisanti",              firm:"Grisanti Group Commercial Real Estate",            states:["KY"],                          rate:"10%",       email:"Paul@grisantigroup.com"},
+  {id:"3820096123", name:"Rhonda Karageorge",          firm:"Commonwealth Commercial Real Estate",              states:["KY"],                          rate:"Varies",    email:"rk@ccre.biz"},
+  {id:"5234719635", name:"Matthew Curran",             firm:"Mackenzie Commercial Real Estate Services",        states:["MD"],                          rate:"10-25%",    email:"mcurran@mackenziecommercial.com"},
+  {id:"4380970951", name:"Gillian Greenfield",         firm:"Coldwell Banker Premier",                          states:["MD","VA"],                      rate:"Varies",    email:"gillian.greenfield@greenfieldcom.com"},
+  {id:"5655007658", name:"Josh Seadia",                firm:"JMJ CRE",                                          states:["MA"],                          rate:"Varies",    email:"josh@jmj-cre.com"},
+  {id:"5337139425", name:"Thomas Jamieson",            firm:"Martin Commercial Properties",                     states:["MI"],                          rate:"50%",       email:""},
+  {id:"3798065381", name:"Scott Ritter",               firm:"Aspen Group, LLP",                                 states:["MN","ND"],                      rate:"10%",       email:"scott@aspengrouprealestate.com"},
+  {id:"11486057212",name:"Mike Doyle",                 firm:"Kenwood Commercial",                               states:["MN"],                          rate:"10%",       email:"mdoyle@kenwoodcommercial.com"},
+  {id:"3798065458", name:"Samuel G. Cox",              firm:"Pinpoint Commercial Real Estate, LLC",             states:["MS"],                          rate:"10%",       email:"sam@pinpointcres.com"},
+  {id:"3798065295", name:"Jared Hancock",              firm:"Scout Realty Group",                               states:["MO"],                          rate:"10-15%",    email:"jhancock@scoutrg.com"},
+  {id:"7829346862", name:"Molly Crawford Munninghoff", firm:"COPAKEN-BROOKS",                                    states:["MO"],                          rate:"15%",       email:"Mcrawford@copaken-brooks.com"},
+  {id:"6447464170", name:"Mike Wilen",                 firm:"South Atlantic Sites",                             states:["NC"],                          rate:"Varies",    email:""},
+  {id:"9050497357", name:"Michael Bartolacci",         firm:"NAI Hanson (NAIH)",                                states:["NJ"],                          rate:"10%",       email:"mbartolacci@naisummit.com"},
+  {id:"3798065498", name:"Jennifer Wilcox",            firm:"Berkshire Hathaway HomeServices Enchanted Lands",  states:["NM"],                          rate:"20%",       email:"jen@enchantedlandshomes.com"},
+  {id:"2771506646", name:"Danielle Trevino",           firm:"Milestone Realty",                                 states:["NV"],                          rate:"20%",       email:"dtrevinolvhomes@gmail.com"},
+  {id:"6447449571", name:"Benjamin Blumenthal",        firm:"Noah & Co",                                        states:["NY"],                          rate:"10%",       email:""},
+  {id:"9955985786", name:"Michael Murphy",             firm:"Douglas Elliman Realty, LLC",                      states:["NY"],                          rate:"20%",       email:""},
+  {id:"3798065002", name:"Craig DeLorenzo",            firm:"Hoff & Leigh",                                     states:["OH"],                          rate:"10%",       email:"cdelorenzo@hoffleigh.com"},
+  {id:"3798065292", name:"Tom H. Vaught, SIOR",        firm:"Victory Commercial Real Estate",                   states:["OK"],                          rate:"10%",       email:"tom@victorycre.com"},
+  {id:"3798064790", name:"Dan Kemp",                   firm:"Compass Commercial",                               states:["OR"],                          rate:"10%",       email:"dkemp@compasscommercial.com"},
+  {id:"3820112107", name:"Stanford Scrive",            firm:"Northwest Tenant Group",                           states:["OR"],                          rate:"Varies",    email:"stanford@nwtenantgroup.com"},
+  {id:"3798064616", name:"Michael Bartolacci",         firm:"NAI Summit - Summit Management and Realty",        states:["PA"],                          rate:"10-50%",    email:"mbartolacci@naisummit.com"},
+  {id:"6545404148", name:"Jeffrey J. Garibaldi",       firm:"NAI Summit - The Garibaldi Group, LLC",            states:["PA"],                          rate:"10%",       email:""},
+  {id:"5928303696", name:"Eric Szczepkowski",          firm:"Tri Town Associates (UNCME LLC)",                  states:["RI"],                          rate:"10%",       email:"eric@tritowncommercial.com"},
+  {id:"7592967390", name:"Taylor Barnes",              firm:"The Nichols Company",                              states:["SC"],                          rate:"50%",       email:"taylor@thenicholscompany.com"},
+  {id:"11750994510",name:"Wendy Pierce",               firm:"Fickling & Company",                               states:["SC"],                          rate:"10%",       email:"wpierce@fickling.com"},
+  {id:"3798065202", name:"Jim Dunham",                 firm:"Jim Dunham & Associates",                          states:["SD"],                          rate:"Varies",    email:""},
+  {id:"3798064926", name:"Noah Myers",                 firm:"Cornerstone Realty Associates",                    states:["TN"],                          rate:"10%",       email:"noah@myers-bros.com"},
+  {id:"2771500776", name:"Michelle Doong",             firm:"Mountain West Commercial Real Estate",             states:["UT"],                          rate:"10%",       email:"mdoong@mtnwest.com"},
+  {id:"3798064656", name:"Jay Burnell",                firm:"Parker Burnett Real Estate Group",                 states:["VA"],                          rate:"10%",       email:"jay@parkerburnell.com"},
+  {id:"11073588214",name:"Scott Wimbrow",              firm:"Mackenzie Commercial Real Estate Services",        states:["VA"],                          rate:"10%",       email:"swimbrow@mackenziecommercial.com"},
+  {id:"3819907378", name:"Austin H. Newman, SIOR",     firm:"S.L. Nusbaum Realty Co.",                          states:["VA"],                          rate:"Varies",    email:"anewman@slnusbaum.com"},
+  {id:"3798064680", name:"Ryan Smith",                 firm:"Martin Smith, Inc.",                               states:["WA"],                          rate:"15%",       email:"rsmith@martinsmith.com"},
+  {id:"3798065441", name:"Collin Hough",               firm:"Anderson Commercial Group, LLC",                   states:["WI"],                          rate:"10-25%",    email:"chough@andersoncommercialgroup.com"},
+  {id:"7165058571", name:"Kristyn Steckler",           firm:"CRA Group, LLC",                                   states:["ND"],                          rate:"50%",       email:"kristyn@thecragroup.com"},
+];
+
+let hasCb = false, selectedCb = null, filteredList = [...CO_BROKERS], attachedFiles = [];
+
+Office.onReady(function(info) {
+  if (info.host === Office.HostType.Outlook) {
+    try {
+      const email = Office.context.mailbox.userProfile.emailAddress;
+      if (email) document.getElementById('brokerEmail').value = email;
+    } catch(e) {}
+  }
+  initForm();
+});
+
+function initForm() {
+  const states = [...new Set(CO_BROKERS.flatMap(b => b.states))].sort();
+  const sel = document.getElementById('stateFilter');
+  states.forEach(s => { const o = document.createElement('option'); o.value = s; o.textContent = s; sel.appendChild(o); });
+  renderDrop();
+  document.addEventListener('click', e => { if (!document.getElementById('cbWrap').contains(e.target)) closeDrop(); });
+}
+
+function toggleCb() {
+  hasCb = !hasCb;
+  document.getElementById('cbTog').classList.toggle('on', hasCb);
+  document.getElementById('cbTog').setAttribute('aria-checked', String(hasCb));
+  document.getElementById('cbLbl').textContent = hasCb ? 'Co-broker involved' : 'No co-broker on this transaction';
+  document.getElementById('cbSec').style.display = hasCb ? 'block' : 'none';
+  if (!hasCb) clearCb();
+}
+
+function onStateChange() { filterBrokers(); openDrop(); }
+function onCbInput() { clearCbSel(); filterBrokers(); openDrop(); }
+
+function filterBrokers() {
+  const q = document.getElementById('cbSearch').value.toLowerCase().trim();
+  const st = document.getElementById('stateFilter').value;
+  filteredList = CO_BROKERS.filter(b => (!st || b.states.includes(st)) && (!q || b.name.toLowerCase().includes(q) || b.firm.toLowerCase().includes(q)));
+  renderDrop();
+}
+
+function renderDrop() {
+  const d = document.getElementById('cbDrop');
+  if (!filteredList.length) { d.innerHTML = '<div class="cb-empty">No results. This may be a new co-broker.</div>'; return; }
+  d.innerHTML = filteredList.map(b => `<div class="cb-item" onclick="selectCb('${b.id}')"><div class="cb-n">${b.name}</div><div class="cb-f">${b.firm}</div><div class="cb-m">${b.states.join(', ')} &middot; Rate on file: ${b.rate}${b.email ? ' &middot; ' + b.email : ''}</div></div>`).join('');
+}
+
+function openDrop()  { document.getElementById('cbDrop').classList.add('open'); }
+function closeDrop() { document.getElementById('cbDrop').classList.remove('open'); }
+
+function selectCb(id) {
+  selectedCb = CO_BROKERS.find(b => b.id === id);
+  document.getElementById('cbSearch').value = selectedCb.name;
+  closeDrop();
+  document.getElementById('selTag').style.display = 'block';
+  document.getElementById('selTag').innerHTML = `<div class="tag">&#10003; ${selectedCb.name} &middot; ${selectedCb.firm}<button class="tag-x" onclick="clearCb()">&times;</button></div>`;
+  document.getElementById('rateBox').style.display = 'block';
+  document.getElementById('rateBox').innerHTML = selectedCb.rate === 'Varies'
+    ? `<div class="rate-warn">Rate on file: <strong>Varies</strong> &mdash; confirm with co-broker before submitting.</div>`
+    : `<div class="rate-ok">Rate on file: <strong>${selectedCb.rate}</strong> &mdash; verify this matches your commission agreement.</div>`;
+  if (selectedCb.rate !== 'Varies') document.getElementById('cbRate').value = selectedCb.rate;
+  document.getElementById('cbRateRow').style.display = 'block';
+}
+
+function clearCbSel() {
+  selectedCb = null;
+  ['selTag','rateBox','cbRateRow'].forEach(id => document.getElementById(id).style.display = 'none');
+  document.getElementById('cbRate').value = '';
+}
+function clearCb() { clearCbSel(); document.getElementById('cbSearch').value = ''; }
+
+function fmtSize(b) { return b < 1048576 ? (b/1024).toFixed(1)+'KB' : (b/1048576).toFixed(1)+'MB'; }
+function onFileSelect(e) { addFiles(Array.from(e.target.files)); e.target.value = ''; }
+function onDrop(e) { e.preventDefault(); document.getElementById('dropZone').classList.remove('drag'); addFiles(Array.from(e.dataTransfer.files)); }
+function addFiles(files) {
+  files.forEach(f => { if (!attachedFiles.find(x => x.name === f.name && x.size === f.size)) attachedFiles.push(f); });
+  renderFiles();
+}
+function removeFile(i) { attachedFiles.splice(i, 1); renderFiles(); }
+function renderFiles() {
+  document.getElementById('fileList').innerHTML = attachedFiles.map((f,i) => `<div class="fp"><span class="fp-name">&#128196; ${f.name}</span><span class="fp-size">${fmtSize(f.size)}</span><button class="fp-x" onclick="removeFile(${i})">&times;</button></div>`).join('');
+}
+
+function v(id) { return document.getElementById(id).value.trim(); }
+function validate() {
+  if (!v('client'))                                      return 'Client: City, State is required.';
+  if (!v('brokerEmail') || !v('brokerEmail').includes('@')) return 'A valid broker email is required.';
+  if (!v('billCo'))                                      return 'Payer company is required.';
+  if (!v('billName'))                                    return 'Billing contact name is required.';
+  if (!v('billEmail') || !v('billEmail').includes('@'))  return 'A valid billing email is required.';
+  if (!v('commRate'))                                    return 'Commission rate is required.';
+  if (!v('payStr'))                                      return 'Payment structure is required.';
+  if (hasCb && !selectedCb)                              return 'Select a co-broker or disable that section.';
+  if (hasCb && !v('cbRate'))                             return 'Co-broker commission rate is required.';
+  return null;
+}
+
+async function handleSubmit() {
+  const err = validate();
+  if (err) { showErr(err); return; }
+  document.getElementById('errBox').style.display = 'none';
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('spinMsg').style.display = 'inline';
+
+  const today = new Date().toISOString().split('T')[0];
+  const billingBlock = ['BILLING CONTACT','Company: '+v('billCo'),'Name: '+v('billName'),'Email: '+v('billEmail'),'Commission Rate: '+v('commRate'),'Payment Structure: '+v('payStr')].join('\n');
+  const coBrokerBlock = (hasCb && selectedCb)
+    ? ['\n','CO-BROKER','Firm: '+selectedCb.firm,'Name: '+selectedCb.name,...(selectedCb.email?['Email: '+selectedCb.email]:[]),'Commission Rate: '+v('cbRate')].join('\n')
+    : '\n\nCO-BROKER: None';
+
+  try {
+    document.getElementById('spinMsg').textContent = 'Creating item\u2026';
+    const itemId = await createItem(v('client'), v('brokerEmail'), today, billingBlock + coBrokerBlock);
+
+    if (attachedFiles.length > 0) {
+      const bar = document.getElementById('upBar'), fill = document.getElementById('upFill');
+      bar.style.display = 'block';
+      for (let i = 0; i < attachedFiles.length; i++) {
+        document.getElementById('spinMsg').textContent = `Uploading file ${i+1} of ${attachedFiles.length}\u2026`;
+        fill.style.width = ((i+1)/attachedFiles.length*100) + '%';
+        await uploadFile(itemId, attachedFiles[i]);
+      }
+    }
+
+    const fileNote = attachedFiles.length > 0 ? `<br>${attachedFiles.length} file${attachedFiles.length>1?'s':''} uploaded to Monday.com.` : '';
+    document.getElementById('sucMsg').innerHTML = `<strong>${v('client')}</strong> has been added to the<br>Billing &ndash; Invoice &ndash; Request board.${fileNote}<br><br>Anna Jasso will follow up on next steps.`;
+    document.getElementById('mainView').style.display = 'none';
+    document.getElementById('successBox').style.display = 'block';
+  } catch(e) {
+    showErr('Submission failed: ' + e.message);
+    document.getElementById('submitBtn').disabled = false;
+    document.getElementById('spinMsg').style.display = 'none';
+  }
+}
+
+async function createItem(name, email, date, longText) {
+  const colVals = JSON.stringify({ 'email__1': {email, text: email}, 'date__1': {date}, 'long_text__1': {text: longText}, 'status__1': {label: 'Approval Pending'} });
+  const res = await fetch('https://api.monday.com/v2', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': MONDAY_API_TOKEN, 'API-Version': '2024-01' },
+    body: JSON.stringify({ query: 'mutation ($board:ID!,$name:String!,$cols:JSON){create_item(board_id:$board,item_name:$name,column_values:$cols){id}}', variables: { board: BILLING_BOARD_ID, name, cols: colVals } })
+  });
+  const data = await res.json();
+  if (data.errors) throw new Error(data.errors[0].message);
+  if (!data.data)  throw new Error('No response from Monday.com. Check your API token.');
+  return data.data.create_item.id;
+}
+
+async function uploadFile(itemId, file) {
+  const fd = new FormData();
+  fd.append('query', `mutation($file:File!){add_file_to_column(item_id:${itemId},column_id:"${FILE_COLUMN_ID}",file:$file){id}}`);
+  fd.append('variables[file]', file, file.name);
+  const res = await fetch('https://api.monday.com/v2/file', { method:'POST', headers:{'Authorization':MONDAY_API_TOKEN,'API-Version':'2024-01'}, body:fd });
+  const data = await res.json();
+  if (data.errors) throw new Error('File upload: ' + data.errors[0].message);
+}
+
+function showErr(msg) { const e = document.getElementById('errBox'); e.textContent = '\u26A0 ' + msg; e.style.display = 'block'; }
+
+function resetForm() {
+  ['client','brokerEmail','billCo','billName','billEmail','commRate','payStr','cbSearch','cbRate'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  if (hasCb) toggleCb();
+  clearCb();
+  attachedFiles = []; renderFiles();
+  document.getElementById('upBar').style.display = 'none';
+  document.getElementById('upFill').style.width = '0%';
+  document.getElementById('errBox').style.display = 'none';
+  document.getElementById('submitBtn').disabled = false;
+  document.getElementById('spinMsg').style.display = 'none';
+  document.getElementById('spinMsg').textContent = 'Submitting\u2026';
+  document.getElementById('mainView').style.display = 'block';
+  document.getElementById('successBox').style.display = 'none';
+  try { const email=Office.context.mailbox.userProfile.emailAddress; if(email) document.getElementById('brokerEmail').value=email; } catch(e){}
+}
+</script>
+</body>
+</html>
