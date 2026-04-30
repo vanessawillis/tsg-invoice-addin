@@ -2,11 +2,10 @@
 <OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
-           xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides/1.0"
            xsi:type="MailApp">
 
-  <Id>f4a3b2c1-d5e6-7890-abcd-ef1234567890</Id>
-  <Version>1.0.0.1</Version>
+  <Id>e9b2dbf5-4d11-42c5-80f3-8bb873033391</Id>
+  <Version>1.0.0.2</Version>
   <ProviderName>TSG National</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Invoice Request"/>
@@ -59,7 +58,6 @@
 
           <FunctionFile resid="Commands.Url"/>
 
-          <!-- Button on the Home tab (inbox/reading view) -->
           <ExtensionPoint xsi:type="MessageReadCommandSurface">
             <OfficeTab id="TabDefault">
               <Group id="msgReadGroup">
@@ -84,7 +82,6 @@
             </OfficeTab>
           </ExtensionPoint>
 
-          <!-- Button on the Home tab (compose view) -->
           <ExtensionPoint xsi:type="MessageComposeCommandSurface">
             <OfficeTab id="TabDefault">
               <Group id="msgComposeGroup">
@@ -131,6 +128,16 @@
         <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Open the Invoice Request form to submit to Monday.com"/>
       </bt:LongStrings>
     </Resources>
+
+    <WebApplicationInfo>
+      <Id>e9b2dbf5-4d11-42c5-80f3-8bb873033391</Id>
+      <Resource>api://e9b2dbf5-4d11-42c5-80f3-8bb873033391</Resource>
+      <Scopes>
+        <Scope>openid</Scope>
+        <Scope>profile</Scope>
+        <Scope>User.Read</Scope>
+      </Scopes>
+    </WebApplicationInfo>
 
   </VersionOverrides>
 
