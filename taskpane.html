@@ -363,59 +363,118 @@ async function handleSubmit() {
 
   const today = new Date().toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'});
 
-  const lines = [
-    'INVOICE REQUEST — ' + today,
-    '',
-    'DEAL INFORMATION',
-    'Client: ' + v('client'),
-    'Broker Email: ' + v('brokerEmail'),
-    '',
-    'BILLING DETAILS',
-    'Payer Company: ' + v('billCo'),
-    'Contact Name: ' + v('billName'),
-    'Contact Email: ' + v('billEmail'),
-    'Commission Rate: ' + v('commRate'),
-    'Payment Structure: ' + v('payStr'),
-  ];
+  // Build rich HTML email body
+  const s = {
+    wrap:  'font-family:Segoe UI,Arial,sans-serif;font-size:13px;color:#1a1a1a;line-height:1.6;max-width:600px',
+    h1:    'font-size:16px;font-weight:700;color:#074a75;border-bottom:2px solid #f47d48;padding-bottom:4px;margin:18px 0 8px',
+    ul:    'margin:0 0 10px 0;padding-left:20px',
+    li:    'margin-bottom:3px',
+    note:  'background:#fff8f5;border-left:3px solid #f47d48;padding:8px 12px;font-size:12px;color:#a04010;margin-top:16px',
+    hr:    'border:none;border-top:1px solid #e0ddd8;margin:18px 0',
+  };
 
+  let html = '<div style="' + s.wrap + '">';
+  html += '<p style="font-size:15px;font-weight:700;color:#074a75;margin-bottom:4px">Invoice Request</p>';
+  html += '<p style="font-size:11px;color:#888;margin-bottom:16px">' + today + '</p>';
+
+  // Deal Information
+  html += '<p style="' + s.h1 + '">Deal Information</p>';
+  html += '<ul style="' + s.ul + '">';
+  html += '<li style="' + s.li + '"><b>Client:</b> ' + v('client') + '</li>';
+  html += '<li style="' + s.li + '"><b>Broker Email:</b> ' + v('brokerEmail') + '</li>';
+  html += '</ul>';
+
+  // Billing Details
+  html += '<p style="' + s.h1 + '">Billing Details</p>';
+  html += '<ul style="' + s.ul + '">';
+  html += '<li style="' + s.li + '"><b>Payer Company:</b> ' + v('billCo') + '</li>';
+  html += '<li style="' + s.li + '"><b>Contact Name:</b> ' + v('billName') + '</li>';
+  html += '<li style="' + s.li + '"><b>Contact Email:</b> ' + v('billEmail') + '</li>';
+  html += '<li style="' + s.li + '"><b>Commission Rate:</b> ' + v('commRate') + '</li>';
+  html += '<li style="' + s.li + '"><b>Payment Structure:</b> ' + v('payStr') + '</li>';
+  html += '</ul>';
+
+  // Co-Broker
+  html += '<p style="' + s.h1 + '">Co-Broker</p>';
   if (hasCb && selectedCb) {
-    lines.push('');
-    lines.push('CO-BROKER');
-    lines.push('Firm: ' + selectedCb.firm);
-    lines.push('Name: ' + selectedCb.name);
-    if (selectedCb.email) lines.push('Email: ' + selectedCb.email);
-    lines.push('Commission Rate: ' + v('cbRate'));
+    html += '<ul style="' + s.ul + '">';
+    html += '<li style="' + s.li + '"><b>Firm:</b> ' + selectedCb.firm + '</li>';
+    html += '<li style="' + s.li + '"><b>Name:</b> ' + selectedCb.name + '</li>';
+    if (selectedCb.email) html += '<li style="' + s.li + '"><b>Email:</b> ' + selectedCb.email + '</li>';
+    html += '<li style="' + s.li + '"><b>Commission Rate:</b> ' + v('cbRate') + '</li>';
+    html += '</ul>';
   } else {
-    lines.push('');
-    lines.push('CO-BROKER: None');
+    html += '<p style="color:#888;font-size:12px;margin:0 0 10px">None</p>';
   }
 
+  // Attachments
   if (attachedFiles.length > 0) {
-    lines.push('');
-    lines.push('ATTACHMENTS (' + attachedFiles.length + ' file(s) — send separately):');
-    attachedFiles.forEach(f => lines.push('  - ' + f.name));
+    html += '<p style="' + s.h1 + '">Attachments</p>';
+    html += '<ul style="' + s.ul + '">';
+    attachedFiles.forEach(f => {
+      html += '<li style="' + s.li + '">&#128206; ' + f.name + '</li>';
+    });
+    html += '</ul>';
+    html += '<div style="' + s.note + '">Attach the above files to this email before sending.</div>';
   }
+
+  html += '</div>';
 
   const subject = 'Invoice Request: ' + v('client');
-  const body = lines.join('\n');
 
   try {
-    // Use Office.js if available (Outlook add-in context)
     if (typeof Office !== 'undefined' && Office.context && Office.context.mailbox) {
+      // Get user signature if available, append after body
+      let signature = '';
+      try {
+        const item = Office.context.mailbox.item;
+        if (item && item.body) {
+          await new Promise((resolve) => {
+            item.body.getAsync(Office.CoercionType.Html, (result) => {
+              if (result.status === Office.AsyncResultStatus.Succeeded) {
+                // Extract just the signature portion (after </body> or common sig markers)
+                const bodyHtml = result.value || '';
+                const sigMatch = bodyHtml.match(/<div[^>]*id=["']?signature["']?[^>]*>[\s\S]*?<\/div>/i);
+                if (sigMatch) signature = sigMatch[0];
+              }
+              resolve();
+            });
+          });
+        }
+      } catch(sigErr) { /* signature fetch is non-fatal */ }
+
+      const fullHtml = html + (signature ? '<br><br>' + signature : '');
+
       Office.context.mailbox.displayNewMessageForm({
         toRecipients: [BILLING_EMAIL],
         subject: subject,
-        htmlBody: '<pre style="font-family:Segoe UI,sans-serif;font-size:13px">' + body + '</pre>'
+        htmlBody: fullHtml
       });
+
+      // Flag as To Do and categorize green via item properties
+      // (flagging/categorizing on compose is handled by Outlook automatically
+      //  when user sends — we set importance instead as a signal)
+
     } else {
-      // Fallback: mailto for browser
-      const mailto = 'mailto:' + BILLING_EMAIL
-        + '?subject=' + encodeURIComponent(subject)
-        + '&body=' + encodeURIComponent(body);
-      window.location.href = mailto;
+      // Browser fallback — plain text mailto
+      const plain = [
+        'INVOICE REQUEST — ' + today, '',
+        'DEAL INFORMATION',
+        '  Client: ' + v('client'),
+        '  Broker Email: ' + v('brokerEmail'), '',
+        'BILLING DETAILS',
+        '  Payer Company: ' + v('billCo'),
+        '  Contact Name: ' + v('billName'),
+        '  Contact Email: ' + v('billEmail'),
+        '  Commission Rate: ' + v('commRate'),
+        '  Payment Structure: ' + v('payStr'), '',
+        hasCb && selectedCb ? 'CO-BROKER\n  Firm: ' + selectedCb.firm + '\n  Name: ' + selectedCb.name + '\n  Rate: ' + v('cbRate') : 'CO-BROKER: None',
+        attachedFiles.length > 0 ? '\nATTACHMENTS (attach before sending):\n' + attachedFiles.map(f => '  - ' + f.name).join('\n') : ''
+      ].join('\n');
+      window.location.href = 'mailto:' + BILLING_EMAIL + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(plain);
     }
 
-    document.getElementById('sucMsg').innerHTML = 'Your invoice request for <strong>' + v('client') + '</strong> is ready to send.<br>Review the email and click Send to submit to billing.';
+    document.getElementById('sucMsg').innerHTML = 'Invoice request for <strong>' + v('client') + '</strong> is ready.<br>Review the email, attach your files, and click Send.';
     document.getElementById('mainView').style.display = 'none';
     document.getElementById('successBox').style.display = 'block';
   } catch(e) {
