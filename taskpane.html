@@ -48,9 +48,6 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 .tag-x { cursor: pointer; color: #f47d48; font-weight: 700; font-size: 13px; line-height: 1; background: none; border: none; flex-shrink: 0; }
 .rate-ok { background: #eef4fb; border: 1px solid #b8d0e8; border-radius: 2px; padding: 6px 8px; font-size: 10px; color: #074a75; margin-bottom: 6px; }
 .rate-warn { background: #fff8f5; border: 1px solid #f4c8b0; border-radius: 2px; padding: 6px 8px; font-size: 10px; color: #a04010; margin-bottom: 6px; }
-.file-zone { border: 1.5px dashed #c0bbb5; border-radius: 2px; padding: 12px; text-align: center; cursor: pointer; background: #faf9f7; transition: border-color .15s, background .15s; }
-.file-zone:hover, .file-zone.drag { border-color: #074a75; background: #f0f5fb; }
-.file-zone input { display: none; }
 .fz-icon { font-size: 18px; margin-bottom: 3px; }
 .fz-txt { font-size: 11px; color: #555; }
 .fz-txt strong { color: #074a75; }
@@ -149,20 +146,6 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 
       <div class="sec">
         <div class="sl">Attachments</div>
-        <div class="file-zone" id="dropZone"
-          onclick="document.getElementById('fileInput').click()"
-          ondragover="event.preventDefault();this.classList.add('drag')"
-          ondragleave="this.classList.remove('drag')"
-          ondrop="onDrop(event)">
-          <input type="file" id="fileInput" multiple
-            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.msg,.xls,.xlsx"
-            onchange="onFileSelect(event)">
-          <div class="fz-icon">&#128206;</div>
-          <div class="fz-txt"><strong>Click to browse</strong> or drag files here</div>
-          <div class="fz-sub">Lease &middot; Commission Agreement &middot; W-9 &nbsp;|&nbsp; PDF, DOC, JPG, MSG</div>
-        </div>
-        <div class="up-bar" id="upBar"><div class="up-fill" id="upFill"></div></div>
-        <div class="file-list" id="fileList"></div>
       </div>
 
       <div class="err" id="errBox"></div>
@@ -183,7 +166,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 
 <script>
 // ─── CONFIGURATION ───────────────────────────────────────────────────────────
-const BILLING_EMAIL = 'Billing@tsgnational.com';
+const BILLING_EMAIL = 'admin@tsgnational.com';
 // ─────────────────────────────────────────────────────────────────────────────
 
 const CO_BROKERS = [
@@ -258,7 +241,7 @@ const CO_BROKERS = [
   {id:"7165058571", name:"Kristyn Steckler",           firm:"CRA Group, LLC",                                   states:["ND"],                          rate:"50%",       email:"kristyn@thecragroup.com"},
 ];
 
-let hasCb = false, selectedCb = null, filteredList = [...CO_BROKERS], attachedFiles = [];
+let hasCb = false, selectedCb = null, filteredList = [...CO_BROKERS];
 
 Office.onReady(function(info) {
   if (info.host === Office.HostType.Outlook) {
@@ -327,17 +310,7 @@ function clearCbSel() {
 }
 function clearCb() { clearCbSel(); document.getElementById('cbSearch').value = ''; }
 
-function fmtSize(b) { return b < 1048576 ? (b/1024).toFixed(1)+'KB' : (b/1048576).toFixed(1)+'MB'; }
-function onFileSelect(e) { addFiles(Array.from(e.target.files)); e.target.value = ''; }
-function onDrop(e) { e.preventDefault(); document.getElementById('dropZone').classList.remove('drag'); addFiles(Array.from(e.dataTransfer.files)); }
-function addFiles(files) {
-  files.forEach(f => { if (!attachedFiles.find(x => x.name === f.name && x.size === f.size)) attachedFiles.push(f); });
-  renderFiles();
-}
-function removeFile(i) { attachedFiles.splice(i, 1); renderFiles(); }
-function renderFiles() {
-  document.getElementById('fileList').innerHTML = attachedFiles.map((f,i) => `<div class="fp"><span class="fp-name">&#128196; ${f.name}</span><span class="fp-size">${fmtSize(f.size)}</span><button class="fp-x" onclick="removeFile(${i})">&times;</button></div>`).join('');
-}
+
 
 function v(id) { return document.getElementById(id).value.trim(); }
 function validate() {
@@ -407,16 +380,8 @@ async function handleSubmit() {
     html += '<p style="color:#888;font-size:12px;margin:0 0 10px">None</p>';
   }
 
-  // Attachments
-  if (attachedFiles.length > 0) {
-    html += '<p style="' + s.h1 + '">Attachments</p>';
-    html += '<ul style="' + s.ul + '">';
-    attachedFiles.forEach(f => {
-      html += '<li style="' + s.li + '">&#128206; ' + f.name + '</li>';
-    });
-    html += '</ul>';
-    html += '<div style="' + s.note + '">Attach the above files to this email before sending.</div>';
-  }
+  // Attachment reminder
+  html += '<div style="' + s.note + '">&#128206; <strong>Before sending:</strong> attach your executed lease, commission agreement, and co-broker W-9 to this email.</div>';
 
   html += '</div>';
 
@@ -458,8 +423,10 @@ async function handleSubmit() {
     } else {
       // Browser fallback — plain text mailto
       const plain = [
+        'INVOICE REQUEST — ' + today, '',
         'DEAL INFORMATION',
         '  Client: ' + v('client'),
+        '  Broker Email: ' + v('brokerEmail'), '',
         'BILLING DETAILS',
         '  Payer Company: ' + v('billCo'),
         '  Contact Name: ' + v('billName'),
@@ -467,7 +434,7 @@ async function handleSubmit() {
         '  Commission Rate: ' + v('commRate'),
         '  Payment Structure: ' + v('payStr'), '',
         hasCb && selectedCb ? 'CO-BROKER\n  Firm: ' + selectedCb.firm + '\n  Name: ' + selectedCb.name + '\n  Rate: ' + v('cbRate') : 'CO-BROKER: None',
-        attachedFiles.length > 0 ? '\nATTACHMENTS (attach before sending):\n' + attachedFiles.map(f => '  - ' + f.name).join('\n') : ''
+        'REMINDER: Attach executed lease, commission agreement, and co-broker W-9 before sending.'
       ].join('\n');
       window.location.href = 'mailto:' + BILLING_EMAIL + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(plain);
     }
@@ -488,9 +455,7 @@ function resetForm() {
   ['client','brokerEmail','billCo','billName','billEmail','commRate','payStr','cbSearch','cbRate'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
   if (hasCb) toggleCb();
   clearCb();
-  attachedFiles = []; renderFiles();
-  document.getElementById('upBar').style.display = 'none';
-  document.getElementById('upFill').style.width = '0%';
+
   document.getElementById('errBox').style.display = 'none';
   document.getElementById('submitBtn').disabled = false;
   document.getElementById('spinMsg').style.display = 'none';
