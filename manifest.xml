@@ -6,7 +6,7 @@
   xsi:type="MailApp">
 
   <Id>4B43DD06-AA5A-4154-BBD0-51DF02EF0F6A</Id>
-  <Version>1.0.0.1</Version>
+  <Version>1.0.0.2</Version>
   <ProviderName>TSG National</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Invoice Request" />
@@ -17,7 +17,6 @@
 
   <AppDomains>
     <AppDomain>vanessawillis.github.io</AppDomain>
-    <AppDomain>api.monday.com</AppDomain>
   </AppDomains>
 
   <Hosts>
