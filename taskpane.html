@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://vanessawillis.github.io https://api.monday.com https://appsforoffice.microsoft.com; script-src 'self' 'unsafe-inline' https://appsforoffice.microsoft.com; style-src 'self' 'unsafe-inline';">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Invoice Request — TSG National</title>
 <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
@@ -177,13 +178,15 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 <div class="success" id="successBox">
   <div class="suc-c">&#10003;</div>
   <div class="suc-t">Request Submitted</div>
-  <div class="suc-s" id="sucMsg">Your invoice request has been sent to billing.<br>Anna Jasso will follow up on next steps.</div>
+  <div class="suc-s" id="sucMsg">Item created in Monday.com.<br>Anna Jasso will follow up.</div>
   <button class="suc-btn" onclick="resetForm()">Submit Another</button>
 </div>
 
 <script>
-// ─── CONFIGURATION ───────────────────────────────────────────────────────────
-const BILLING_EMAIL = 'Billing@tsgnational.com';
+// ─── CONFIGURE BEFORE DEPLOYING ──────────────────────────────────────────────
+const MONDAY_API_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjY1MTkwOTQxOCwiYWFpIjoxMSwidWlkIjoyNTYyOTk2NCwiaWFkIjoiMjAyNi0wNC0yOVQxNzo0NToxMi4wMDBaIiwicGVyIjoibWU6d3JpdGUiLCJhY3RpZCI6MTAyOTg0MjEsInJnbiI6InVzZTEifQ.Kh-ebdze82JcqkBuugIouJyHXIRJAerTc6Ufhc_9ufc';
+const BILLING_BOARD_ID = '7044757456';
+const FILE_COLUMN_ID   = 'upload_file__1';
 // ─────────────────────────────────────────────────────────────────────────────
 
 const CO_BROKERS = [
@@ -359,129 +362,58 @@ async function handleSubmit() {
   document.getElementById('errBox').style.display = 'none';
   document.getElementById('submitBtn').disabled = true;
   document.getElementById('spinMsg').style.display = 'inline';
-  document.getElementById('spinMsg').textContent = 'Sending\u2026';
 
-  const today = new Date().toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'});
-
-  // Build rich HTML email body
-  const s = {
-    wrap:  'font-family:Segoe UI,Arial,sans-serif;font-size:13px;color:#1a1a1a;line-height:1.6;max-width:600px',
-    h1:    'font-size:16px;font-weight:700;color:#074a75;border-bottom:2px solid #f47d48;padding-bottom:4px;margin:18px 0 8px',
-    ul:    'margin:0 0 10px 0;padding-left:20px',
-    li:    'margin-bottom:3px',
-    note:  'background:#fff8f5;border-left:3px solid #f47d48;padding:8px 12px;font-size:12px;color:#a04010;margin-top:16px',
-    hr:    'border:none;border-top:1px solid #e0ddd8;margin:18px 0',
-  };
-
-  let html = '<div style="' + s.wrap + '">';
-  html += '<p style="font-size:15px;font-weight:700;color:#074a75;margin-bottom:4px">Invoice Request</p>';
-  html += '<p style="font-size:11px;color:#888;margin-bottom:16px">' + today + '</p>';
-
-  // Deal Information
-  html += '<p style="' + s.h1 + '">Deal Information</p>';
-  html += '<ul style="' + s.ul + '">';
-  html += '<li style="' + s.li + '"><b>Client:</b> ' + v('client') + '</li>';
-  html += '<li style="' + s.li + '"><b>Broker Email:</b> ' + v('brokerEmail') + '</li>';
-  html += '</ul>';
-
-  // Billing Details
-  html += '<p style="' + s.h1 + '">Billing Details</p>';
-  html += '<ul style="' + s.ul + '">';
-  html += '<li style="' + s.li + '"><b>Payer Company:</b> ' + v('billCo') + '</li>';
-  html += '<li style="' + s.li + '"><b>Contact Name:</b> ' + v('billName') + '</li>';
-  html += '<li style="' + s.li + '"><b>Contact Email:</b> ' + v('billEmail') + '</li>';
-  html += '<li style="' + s.li + '"><b>Commission Rate:</b> ' + v('commRate') + '</li>';
-  html += '<li style="' + s.li + '"><b>Payment Structure:</b> ' + v('payStr') + '</li>';
-  html += '</ul>';
-
-  // Co-Broker
-  html += '<p style="' + s.h1 + '">Co-Broker</p>';
-  if (hasCb && selectedCb) {
-    html += '<ul style="' + s.ul + '">';
-    html += '<li style="' + s.li + '"><b>Firm:</b> ' + selectedCb.firm + '</li>';
-    html += '<li style="' + s.li + '"><b>Name:</b> ' + selectedCb.name + '</li>';
-    if (selectedCb.email) html += '<li style="' + s.li + '"><b>Email:</b> ' + selectedCb.email + '</li>';
-    html += '<li style="' + s.li + '"><b>Commission Rate:</b> ' + v('cbRate') + '</li>';
-    html += '</ul>';
-  } else {
-    html += '<p style="color:#888;font-size:12px;margin:0 0 10px">None</p>';
-  }
-
-  // Attachments
-  if (attachedFiles.length > 0) {
-    html += '<p style="' + s.h1 + '">Attachments</p>';
-    html += '<ul style="' + s.ul + '">';
-    attachedFiles.forEach(f => {
-      html += '<li style="' + s.li + '">&#128206; ' + f.name + '</li>';
-    });
-    html += '</ul>';
-    html += '<div style="' + s.note + '">Attach the above files to this email before sending.</div>';
-  }
-
-  html += '</div>';
-
-  const subject = 'Invoice Request: ' + v('client');
+  const today = new Date().toISOString().split('T')[0];
+  const billingBlock = ['BILLING CONTACT','Company: '+v('billCo'),'Name: '+v('billName'),'Email: '+v('billEmail'),'Commission Rate: '+v('commRate'),'Payment Structure: '+v('payStr')].join('\n');
+  const coBrokerBlock = (hasCb && selectedCb)
+    ? ['\n','CO-BROKER','Firm: '+selectedCb.firm,'Name: '+selectedCb.name,...(selectedCb.email?['Email: '+selectedCb.email]:[]),'Commission Rate: '+v('cbRate')].join('\n')
+    : '\n\nCO-BROKER: None';
 
   try {
-    if (typeof Office !== 'undefined' && Office.context && Office.context.mailbox) {
-      // Get user signature if available, append after body
-      let signature = '';
-      try {
-        const item = Office.context.mailbox.item;
-        if (item && item.body) {
-          await new Promise((resolve) => {
-            item.body.getAsync(Office.CoercionType.Html, (result) => {
-              if (result.status === Office.AsyncResultStatus.Succeeded) {
-                // Extract just the signature portion (after </body> or common sig markers)
-                const bodyHtml = result.value || '';
-                const sigMatch = bodyHtml.match(/<div[^>]*id=["']?signature["']?[^>]*>[\s\S]*?<\/div>/i);
-                if (sigMatch) signature = sigMatch[0];
-              }
-              resolve();
-            });
-          });
-        }
-      } catch(sigErr) { /* signature fetch is non-fatal */ }
+    document.getElementById('spinMsg').textContent = 'Creating item\u2026';
+    const itemId = await createItem(v('client'), v('brokerEmail'), today, billingBlock + coBrokerBlock);
 
-      const fullHtml = html + (signature ? '<br><br>' + signature : '');
-
-      Office.context.mailbox.displayNewMessageForm({
-        toRecipients: [BILLING_EMAIL],
-        subject: subject,
-        htmlBody: fullHtml
-      });
-
-      // Flag as To Do and categorize green via item properties
-      // (flagging/categorizing on compose is handled by Outlook automatically
-      //  when user sends — we set importance instead as a signal)
-
-    } else {
-      // Browser fallback — plain text mailto
-      const plain = [
-        'INVOICE REQUEST — ' + today, '',
-        'DEAL INFORMATION',
-        '  Client: ' + v('client'),
-        '  Broker Email: ' + v('brokerEmail'), '',
-        'BILLING DETAILS',
-        '  Payer Company: ' + v('billCo'),
-        '  Contact Name: ' + v('billName'),
-        '  Contact Email: ' + v('billEmail'),
-        '  Commission Rate: ' + v('commRate'),
-        '  Payment Structure: ' + v('payStr'), '',
-        hasCb && selectedCb ? 'CO-BROKER\n  Firm: ' + selectedCb.firm + '\n  Name: ' + selectedCb.name + '\n  Rate: ' + v('cbRate') : 'CO-BROKER: None',
-        attachedFiles.length > 0 ? '\nATTACHMENTS (attach before sending):\n' + attachedFiles.map(f => '  - ' + f.name).join('\n') : ''
-      ].join('\n');
-      window.location.href = 'mailto:' + BILLING_EMAIL + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(plain);
+    if (attachedFiles.length > 0) {
+      const bar = document.getElementById('upBar'), fill = document.getElementById('upFill');
+      bar.style.display = 'block';
+      for (let i = 0; i < attachedFiles.length; i++) {
+        document.getElementById('spinMsg').textContent = `Uploading file ${i+1} of ${attachedFiles.length}\u2026`;
+        fill.style.width = ((i+1)/attachedFiles.length*100) + '%';
+        await uploadFile(itemId, attachedFiles[i]);
+      }
     }
 
-    document.getElementById('sucMsg').innerHTML = 'Invoice request for <strong>' + v('client') + '</strong> is ready.<br>Review the email, attach your files, and click Send.';
+    const fileNote = attachedFiles.length > 0 ? `<br>${attachedFiles.length} file${attachedFiles.length>1?'s':''} uploaded to Monday.com.` : '';
+    document.getElementById('sucMsg').innerHTML = `<strong>${v('client')}</strong> has been added to the<br>Billing &ndash; Invoice &ndash; Request board.${fileNote}<br><br>Anna Jasso will follow up on next steps.`;
     document.getElementById('mainView').style.display = 'none';
     document.getElementById('successBox').style.display = 'block';
   } catch(e) {
-    showErr('Failed to open email: ' + e.message);
+    showErr('Submission failed: ' + e.message);
     document.getElementById('submitBtn').disabled = false;
     document.getElementById('spinMsg').style.display = 'none';
   }
+}
+
+async function createItem(name, email, date, longText) {
+  const colVals = JSON.stringify({ 'email__1': {email, text: email}, 'date__1': {date}, 'long_text__1': {text: longText}, 'status__1': {label: 'Approval Pending'} });
+  const res = await fetch('https://api.monday.com/v2', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': MONDAY_API_TOKEN, 'API-Version': '2024-01' },
+    body: JSON.stringify({ query: 'mutation ($board:ID!,$name:String!,$cols:JSON){create_item(board_id:$board,item_name:$name,column_values:$cols){id}}', variables: { board: BILLING_BOARD_ID, name, cols: colVals } })
+  });
+  const data = await res.json();
+  if (data.errors) throw new Error(data.errors[0].message);
+  if (!data.data)  throw new Error('No response from Monday.com. Check your API token.');
+  return data.data.create_item.id;
+}
+
+async function uploadFile(itemId, file) {
+  const fd = new FormData();
+  fd.append('query', `mutation($file:File!){add_file_to_column(item_id:${itemId},column_id:"${FILE_COLUMN_ID}",file:$file){id}}`);
+  fd.append('variables[file]', file, file.name);
+  const res = await fetch('https://api.monday.com/v2/file', { method:'POST', headers:{'Authorization':MONDAY_API_TOKEN,'API-Version':'2024-01'}, body:fd });
+  const data = await res.json();
+  if (data.errors) throw new Error('File upload: ' + data.errors[0].message);
 }
 
 function showErr(msg) { const e = document.getElementById('errBox'); e.textContent = '\u26A0 ' + msg; e.style.display = 'block'; }
