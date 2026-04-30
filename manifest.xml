@@ -5,142 +5,46 @@
   xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
   xsi:type="MailApp">
 
-  <!-- ============================================================
-       TSG National — Outlook Add-In
-       Submit Request Form Router
-       Replace all instances of YOUR-DOMAIN with your hosting URL
-       ============================================================ -->
-
-  <Id>3f7b2a9c-1d4e-4f8a-b6c3-9e2d5f8a1c4b</Id>
-  <Version>1.0.0.0</Version>
+  <Id>4B43DD06-AA5A-4154-BBD0-51DF02EF0F6A</Id>
+  <Version>1.0.0.1</Version>
   <ProviderName>TSG National</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
-  <DisplayName DefaultValue="TSG Submit Request"/>
-  <Description DefaultValue="Opens the TSG National request intake form in your browser."/>
-
-  <!-- Replace icon URLs with your hosted TSG logo icons -->
-  <IconUrl DefaultValue="https://tsgnational.sharepoint.com/sites/TSG/Shared%20Documents/Forms/AllItems.aspx?viewid=db471780%2Dc641%2D43d1%2Dba6f%2D4357"/>
-  <HighResolutionIconUrl DefaultValue="https://YOUR-DOMAIN/tsg-addin/assets/icon-128.png"/>
-  <SupportUrl DefaultValue="https://tsgnational.com"/>
+  <DisplayName DefaultValue="Invoice Request" />
+  <Description DefaultValue="Submit invoice requests to billing." />
+  <IconUrl DefaultValue="https://vanessawillis.github.io/tsg-invoice-addin/icon-80.png" />
+  <HighResolutionIconUrl DefaultValue="https://vanessawillis.github.io/tsg-invoice-addin/icon-80.png" />
+  <SupportUrl DefaultValue="https://tsgnational.com" />
 
   <AppDomains>
-    <AppDomain>https://wkf.ms</AppDomain>
-    <AppDomain>https://app.wrike.com</AppDomain>
+    <AppDomain>vanessawillis.github.io</AppDomain>
+    <AppDomain>api.monday.com</AppDomain>
   </AppDomains>
 
   <Hosts>
-    <Host Name="Mailbox"/>
+    <Host Name="Mailbox" />
   </Hosts>
 
   <Requirements>
     <Sets>
-      <Set Name="Mailbox" MinVersion="1.3"/>
+      <Set Name="Mailbox" MinVersion="1.1" />
     </Sets>
   </Requirements>
 
-  <!-- Fallback for older Outlook clients -->
   <FormSettings>
     <Form xsi:type="ItemRead">
       <DesktopSettings>
-        <SourceLocation DefaultValue="https://tsgnational.sharepoint.com/sites/TSG/Shared%20Documents/Forms/AllItems.aspx?viewid=db471780%2Dc641%2D43d1%2Dba6f%2D4357"/>
+        <SourceLocation DefaultValue="https://vanessawillis.github.io/tsg-invoice-addin/taskpane.html" />
         <RequestedHeight>250</RequestedHeight>
       </DesktopSettings>
     </Form>
   </FormSettings>
 
-  <Permissions>ReadItem</Permissions>
+  <Permissions>ReadWriteMailbox</Permissions>
 
   <Rule xsi:type="RuleCollection" Mode="Or">
-    <Rule xsi:type="ItemIs" ItemType="Message" FormType="Read"/>
-    <Rule xsi:type="ItemIs" ItemType="Message" FormType="Edit"/>
+    <Rule xsi:type="ItemIs" ItemType="Message" FormType="ReadOrEdit" />
   </Rule>
 
-  <!-- VersionOverrides: Modern ribbon button definition -->
-  <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides" xsi:type="VersionOverridesV1_0">
+  <DisableEntityHighlighting>false</DisableEntityHighlighting>
 
-    <Requirements>
-      <bt:Sets DefaultMinVersion="1.3">
-        <bt:Set Name="Mailbox"/>
-      </bt:Sets>
-    </Requirements>
-
-    <Hosts>
-      <Host xsi:type="MailHost">
-        <DesktopFormFactor>
-
-          <!-- Function file containing the openForm() JS function -->
-          <FunctionFile resid="Commands.Url"/>
-
-          <!-- Button in the READ view ribbon -->
-          <ExtensionPoint xsi:type="MessageReadCommandSurface">
-            <OfficeTab id="TabDefault">
-              <Group id="tsgReadGroup">
-                <Label resid="GroupLabel"/>
-                <Control xsi:type="Button" id="tsgReadButton">
-                  <Label resid="ButtonLabel"/>
-                  <Supertip>
-                    <Title resid="ButtonLabel"/>
-                    <Description resid="ButtonTooltip"/>
-                  </Supertip>
-                  <Icon>
-                    <bt:Image size="16" resid="Icon.16x16"/>
-                    <bt:Image size="32" resid="Icon.32x32"/>
-                    <bt:Image size="80" resid="Icon.80x80"/>
-                  </Icon>
-                  <Action xsi:type="ExecuteFunction">
-                    <FunctionName>openForm</FunctionName>
-                  </Action>
-                </Control>
-              </Group>
-            </OfficeTab>
-          </ExtensionPoint>
-
-          <!-- Button in the COMPOSE view ribbon -->
-          <ExtensionPoint xsi:type="MessageComposeCommandSurface">
-            <OfficeTab id="TabDefault">
-              <Group id="tsgComposeGroup">
-                <Label resid="GroupLabel"/>
-                <Control xsi:type="Button" id="tsgComposeButton">
-                  <Label resid="ButtonLabel"/>
-                  <Supertip>
-                    <Title resid="ButtonLabel"/>
-                    <Description resid="ButtonTooltip"/>
-                  </Supertip>
-                  <Icon>
-                    <bt:Image size="16" resid="Icon.16x16"/>
-                    <bt:Image size="32" resid="Icon.32x32"/>
-                    <bt:Image size="80" resid="Icon.80x80"/>
-                  </Icon>
-                  <Action xsi:type="ExecuteFunction">
-                    <FunctionName>openForm</FunctionName>
-                  </Action>
-                </Control>
-              </Group>
-            </OfficeTab>
-          </ExtensionPoint>
-
-        </DesktopFormFactor>
-      </Host>
-    </Hosts>
-
-    <Resources>
-      <bt:Images>
-        <!-- Replace with your hosted TSG icon files -->
-        <bt:Image id="Icon.16x16" DefaultValue="https://tsgnational.sharepoint.com/sites/TSG/Shared%20Documents/Forms/AllItems.aspx?viewid=db471780%2Dc641%2D43d1%2Dba6f%2D4357"/>
-        <bt:Image id="Icon.32x32" DefaultValue="https://tsgnational.sharepoint.com/sites/TSG/Shared%20Documents/Forms/AllItems.aspx?viewid=db471780%2Dc641%2D43d1%2Dba6f%2D4357"/>
-        <bt:Image id="Icon.80x80" DefaultValue="https://tsgnational.sharepoint.com/sites/TSG/Shared%20Documents/Forms/AllItems.aspx?viewid=db471780%2Dc641%2D43d1%2Dba6f%2D4357"/>
-      </bt:Images>
-      <bt:Urls>
-        <bt:Url id="Commands.Url" DefaultValue="https://tsgnational.sharepoint.com/sites/TSG/Shared%20Documents/Forms/AllItems.aspx?viewid=db471780%2Dc641%2D43d1%2Dba6f%2D4357"/>
-      </bt:Urls>
-      <bt:ShortStrings>
-        <bt:String id="GroupLabel" DefaultValue="TSG National"/>
-        <bt:String id="ButtonLabel" DefaultValue="Submit Request"/>
-      </bt:ShortStrings>
-      <bt:LongStrings>
-        <bt:String id="ButtonTooltip" DefaultValue="Open the TSG National request intake form."/>
-      </bt:LongStrings>
-    </Resources>
-
-  </VersionOverrides>
 </OfficeApp>
