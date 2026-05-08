@@ -30,10 +30,10 @@
   </Requirements>
 
   <FormSettings>
-    <Form xsi:type="ItemRead">
+    <Form xsi:type="ItemEdit">
       <DesktopSettings>
         <SourceLocation DefaultValue="https://vanessawillis.github.io/tsg-invoice-addin/taskpane.html" />
-        <RequestedHeight>500</RequestedHeight>
+        <RequestedHeight>900</RequestedHeight>
       </DesktopSettings>
     </Form>
   </FormSettings>
@@ -41,7 +41,7 @@
   <Permissions>ReadWriteMailbox</Permissions>
 
   <Rule xsi:type="RuleCollection" Mode="Or">
-    <Rule xsi:type="ItemIs" ItemType="Message" FormType="ReadOrEdit" />
+    <Rule xsi:type="ItemIs" ItemType="Message" FormType="Edit" />
   </Rule>
 
   <DisableEntityHighlighting>false</DisableEntityHighlighting>
