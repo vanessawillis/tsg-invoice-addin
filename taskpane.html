@@ -237,7 +237,7 @@ const CO_BROKERS = [
   {id:"7165058571", name:"Kristyn Steckler",           firm:"CRA Group, LLC",                                   states:["ND"],                          rate:"50%",       email:"kristyn@thecragroup.com"},
 ];
 
-let hasCb = false, selectedCb = null, isCustomCb = false, filteredList = [...CO_BROKERS];
+let hasCb = false, selectedCb = null, filteredList = [...CO_BROKERS];
 
 Office.onReady(function(info) {
   if (info.host === Office.HostType.Outlook) {
@@ -278,11 +278,8 @@ function filterBrokers() {
 
 function renderDrop() {
   const d = document.getElementById('cbDrop');
-  const q = document.getElementById('cbSearch').value.trim();
-  let html = filteredList.map(b => `<div class="cb-item" onclick="selectCb('${b.id}')"><div class="cb-n">${b.name}</div><div class="cb-f">${b.firm}</div><div class="cb-m">${b.states.join(', ')} &middot; Rate on file: ${b.rate}${b.email ? ' &middot; ' + b.email : ''}</div></div>`).join('');
-  if (q) html += `<div class="cb-item" style="border-top:1px solid #e0ddd8" onclick="useCustomCb()"><div class="cb-n" style="color:#f47d48">+ Use "${q}" as new co-broker</div><div class="cb-f">Not on the co-broker list</div></div>`;
-  if (!filteredList.length && !q) { d.innerHTML = '<div class="cb-empty">No results.</div>'; return; }
-  d.innerHTML = html;
+  if (!filteredList.length) { d.innerHTML = '<div class="cb-empty">No results. This may be a new co-broker.</div>'; return; }
+  d.innerHTML = filteredList.map(b => `<div class="cb-item" onclick="selectCb('${b.id}')"><div class="cb-n">${b.name}</div><div class="cb-f">${b.firm}</div><div class="cb-m">${b.states.join(', ')} &middot; Rate on file: ${b.rate}${b.email ? ' &middot; ' + b.email : ''}</div></div>`).join('');
 }
 
 function openDrop()  { document.getElementById('cbDrop').classList.add('open'); }
@@ -304,26 +301,10 @@ function selectCb(id) {
 
 function clearCbSel() {
   selectedCb = null;
-  isCustomCb = false;
-  ['selTag','rateBox','cbRateRow','cbCustomFields'].forEach(id => document.getElementById(id).style.display = 'none');
+  ['selTag','rateBox','cbRateRow'].forEach(id => document.getElementById(id).style.display = 'none');
   document.getElementById('cbRate').value = '';
-  document.getElementById('cbCustomFirm').value = '';
 }
 function clearCb() { clearCbSel(); document.getElementById('cbSearch').value = ''; }
-
-function useCustomCb() {
-  const name = document.getElementById('cbSearch').value.trim();
-  if (!name) return;
-  isCustomCb = true;
-  selectedCb = null;
-  closeDrop();
-  document.getElementById('selTag').style.display = 'block';
-  document.getElementById('selTag').innerHTML = `<div class="tag">&#10003; ${name} <em style="font-weight:400">(new)</em><button class="tag-x" onclick="clearCb()">&times;</button></div>`;
-  document.getElementById('cbCustomFields').style.display = 'block';
-  document.getElementById('cbCustomName').value = name;
-  document.getElementById('rateBox').style.display = 'none';
-  document.getElementById('cbRateRow').style.display = 'block';
-}
 
 
 
@@ -336,8 +317,7 @@ function validate() {
   if (!v('billEmail') || !v('billEmail').includes('@'))  return 'A valid billing email is required.';
   if (!v('commRate'))                                    return 'Commission rate is required.';
   if (!v('payStr'))                                      return 'Payment structure is required.';
-  if (hasCb && !selectedCb && !isCustomCb)               return 'Select a co-broker or use the + option to add a new one.';
-  if (hasCb && isCustomCb && !document.getElementById('cbSearch').value.trim()) return 'Enter the co-broker name.';
+  if (hasCb && !selectedCb)                              return 'Select a co-broker or disable that section.';
   if (hasCb && !v('cbRate'))                             return 'Co-broker commission rate is required.';
   return null;
 }
@@ -385,14 +365,11 @@ async function handleSubmit() {
 
   // Co-Broker
   html += '<p style="' + s.h1 + '">Co-Broker</p>';
-  if (hasCb) {
-    const cbName = selectedCb ? selectedCb.name : document.getElementById('cbSearch').value.trim();
-    const cbFirm = selectedCb ? selectedCb.firm : document.getElementById('cbCustomFirm').value.trim();
-    const cbEmail = selectedCb ? selectedCb.email : '';
+  if (hasCb && selectedCb) {
     html += '<ul style="' + s.ul + '">';
-    if (cbFirm) html += '<li style="' + s.li + '"><b>Firm:</b> ' + cbFirm + '</li>';
-    html += '<li style="' + s.li + '"><b>Name:</b> ' + cbName + '</li>';
-    if (cbEmail) html += '<li style="' + s.li + '"><b>Email:</b> ' + cbEmail + '</li>';
+    html += '<li style="' + s.li + '"><b>Firm:</b> ' + selectedCb.firm + '</li>';
+    html += '<li style="' + s.li + '"><b>Name:</b> ' + selectedCb.name + '</li>';
+    if (selectedCb.email) html += '<li style="' + s.li + '"><b>Email:</b> ' + selectedCb.email + '</li>';
     html += '<li style="' + s.li + '"><b>Commission Rate:</b> ' + v('cbRate') + '</li>';
     html += '</ul>';
   } else {
@@ -408,14 +385,39 @@ async function handleSubmit() {
 
   try {
     if (typeof Office !== 'undefined' && Office.context && Office.context.mailbox) {
+      // Get user signature if available, append after body
+      let signature = '';
+      try {
+        const item = Office.context.mailbox.item;
+        if (item && item.body) {
+          await new Promise((resolve) => {
+            item.body.getAsync(Office.CoercionType.Html, (result) => {
+              if (result.status === Office.AsyncResultStatus.Succeeded) {
+                // Extract just the signature portion (after </body> or common sig markers)
+                const bodyHtml = result.value || '';
+                const sigMatch = bodyHtml.match(/<div[^>]*id=["']?signature["']?[^>]*>[\s\S]*?<\/div>/i);
+                if (sigMatch) signature = sigMatch[0];
+              }
+              resolve();
+            });
+          });
+        }
+      } catch(sigErr) { /* signature fetch is non-fatal */ }
+
+      const fullHtml = html + (signature ? '<br><br>' + signature : '');
+
       Office.context.mailbox.displayNewMessageForm({
         toRecipients: [BILLING_EMAIL],
         subject: subject,
-        htmlBody: html
+        htmlBody: fullHtml
       });
+
+      // Flag as To Do and categorize green via item properties
+      // (flagging/categorizing on compose is handled by Outlook automatically
+      //  when user sends — we set importance instead as a signal)
+
     } else {
-      const cbName = hasCb ? (selectedCb ? selectedCb.name : v('cbSearch')) : null;
-      const cbFirm = hasCb ? (selectedCb ? selectedCb.firm : v('cbCustomFirm')) : null;
+      // Browser fallback — plain text mailto
       const plain = [
         'INVOICE REQUEST — ' + today, '',
         'DEAL INFORMATION',
@@ -427,8 +429,7 @@ async function handleSubmit() {
         '  Contact Email: ' + v('billEmail'),
         '  Commission Rate: ' + v('commRate'),
         '  Payment Structure: ' + v('payStr'), '',
-        hasCb ? 'CO-BROKER\n  Name: ' + cbName + (cbFirm ? '\n  Firm: ' + cbFirm : '') + '\n  Rate: ' + v('cbRate') : 'CO-BROKER: None',
-        '',
+        hasCb && selectedCb ? 'CO-BROKER\n  Firm: ' + selectedCb.firm + '\n  Name: ' + selectedCb.name + '\n  Rate: ' + v('cbRate') : 'CO-BROKER: None',
         'REMINDER: Attach executed lease, commission agreement, and co-broker W-9 before sending.'
       ].join('\n');
       window.location.href = 'mailto:' + BILLING_EMAIL + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(plain);
